@@ -42,7 +42,43 @@ namespace R5T.NetStandard.SSH
                 sftpClient.CreateDirectoryOkIfIntermediatesAndExists(parentDirectoryPath);
             }
 
-            sftpClient.CreateDirectory(directoryPath);
+            sftpClient.CreateDirectoryOkIfExists(directoryPath);
+        }
+
+        /// <summary>
+        /// Deletes a directory.
+        /// Idempotent, can be called multiple times (does not throw an exception if the directory does not exist).
+        /// Note, this is different than the <see cref="System.IO.Directory.Delete(string)"/> behavior.
+        /// </summary>
+        public static void DeleteDirectoryOkIfNotExists(this SftpClient sftpClient, string directoryPath)
+        {
+            if (sftpClient.Exists(directoryPath))
+            {
+                sftpClient.Delete(directoryPath);
+            }
+        }
+
+        /// <summary>
+        /// Deletes a directory.
+        /// Deletes a directory even if the directory has contents, equivalent to the "-rf" option.
+        /// Idempotent, can be called multiple times (does not throw an exception if the directory does not exist).
+        /// </summary>
+        public static void DeleteDirectoryRobust(this SftpClient sftpClient, string directoryPath)
+        {
+            if (sftpClient.Exists(directoryPath))
+            {
+                using (var sshClient = sftpClient.ConnectionInfo.GetSshClient())
+                {
+                    var commandText = $"rm -rf \"{directoryPath}\"";
+                    using (var command = sshClient.RunCommand(commandText))
+                    {
+                        if(command.ExitStatus != 0)
+                        {
+                            throw new Exception($"Command result:\n{command.Result}");
+                        }
+                    }
+                }
+            }
         }
     }
 }

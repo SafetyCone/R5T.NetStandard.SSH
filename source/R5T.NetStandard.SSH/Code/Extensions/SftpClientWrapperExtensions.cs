@@ -16,28 +16,34 @@ namespace R5T.NetStandard.SSH
         }
 
         /// <summary>
-        /// Deletes a directory.
-        /// Not idempotent, cannot be called multiple times. If an attempt is made to delete a non-existent directory, "Renci.SshNet.Common.SftpPathNotFoundException: 'No such file'" is thrown.
-        /// Note, this is consistent with the <see cref="System.IO.Directory.Delete(string)"/> behavior.
+        /// Creates a directory.
+        /// Not idempotent, cannot be called multiple times (throws an exception if the directory already exists).
         /// </summary>
-        public static void DeleteDirectoryThrowIfNotExists(this SftpClientWrapper clientWrapper, string directoryPath)
+        public static void CreateDirectoryThrowIfExists(this SftpClientWrapper clientWrapper, string directoryPath)
         {
-            clientWrapper.SftpClient.DeleteDirectory(directoryPath);
+            clientWrapper.SftpClient.CreateDirectory(directoryPath);
         }
 
         /// <summary>
-        /// Creates a directory.
+        /// Deletes a directory.
         /// Idempotent, can be called multiple times (does not throw an exception if the directory does not exist).
         /// Note, this is different than the <see cref="System.IO.Directory.Delete(string)"/> behavior.
+        /// Deletes a directory even if the the directory has contents.
         /// </summary>
         public static void DeleteDirectory(this SftpClientWrapper clientWrapper, string directoryPath)
         {
-            var client = clientWrapper.SftpClient;
+            clientWrapper.SftpClient.DeleteDirectoryRobust(directoryPath);
+        }
 
-            if(client.Exists(directoryPath))
-            {
-                client.Delete(directoryPath);
-            }
+        /// <summary>
+        /// Deletes a directory.
+        /// Not idempotent, cannot be called multiple times. If an attempt is made to delete a non-existent directory, "Renci.SshNet.Common.SftpPathNotFoundException: 'No such file'" is thrown.
+        /// Note, this is consistent with the <see cref="System.IO.Directory.Delete(string)"/> behavior.
+        /// The directory must be empty.
+        /// </summary>
+        public static void DeleteDirectoryThrowIfNotExistsOrHasContents(this SftpClientWrapper clientWrapper, string directoryPath)
+        {
+            clientWrapper.SftpClient.DeleteDirectory(directoryPath);
         }
     }
 }
