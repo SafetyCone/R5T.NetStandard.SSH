@@ -7,4 +7,7 @@
   <ItemGroup>
     <PackageReference Include="SSH.NET" Version="2016.1.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\R5T.NetStandard.IO.Paths.Types\source\R5T.NetStandard.IO.Paths.Types\R5T.NetStandard.IO.Paths.Types.csproj" />
+  </ItemGroup>
 </Project>
