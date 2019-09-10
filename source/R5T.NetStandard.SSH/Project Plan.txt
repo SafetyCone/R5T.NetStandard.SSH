@@ -2,3 +2,16 @@ R5T.NetStandard.SSH - A library for SSH-related functionality (SFTP, etc.) built
 
 Goals
 
+SFTP Client
+
+* Create directory
+	* (DONE) Create a directory.
+	* (DONE) What if the directory already exists? - Use the SftpClient extension method CreateDirectoryOkIfExists(). The Directory.CreateDirectory() method does not error if creating a directory that already exists, but the SftpClient.CreateDirectory() method does. This SftpClient extension method matches the behavior of the Directory method.
+	* (DONE) Create a directory whose parent directory does not exist? - The SftpClient will not do this! Instead, it throws an error claiming the path does not exist (i.e. that the first parent intermediate directory that does not exist, does not exist). An extension to SftpClient was created that uses the path utilities to walk up the parent directory paths until a directory is found to exist, then create all intermediate paths on the way back down.
+* Delete directory
+	* Create a directory.
+	* What if the directory does not exist? - The Directory.DeleteDirectory() method throws an exception if the directory to be deleted does not exist. So does the SftpClient.DeleteDirectory() method. The default DeleteDirectory() method on the SftpClient wrapper is now idempotent, allowing it to be called multiple times.
+	* Delete a directory with sub-directories?
+* List directory contents.
+	* List directory relative paths.
+	* List *local* directory relative paths!
